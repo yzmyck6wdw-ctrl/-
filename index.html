@@ -63,7 +63,7 @@ p{margin:6px 12px;opacity:.85;font-size:clamp(11px,2.8vh,16px);max-width:640px}
 <div id="trk"></div><div id="cur"></div>
 <div><button class="btn" id="play">ИГРАТЬ</button><button class="btn" id="onb">ОНЛАЙН</button></div>
 <button class="btn s" id="shopb">МАГАЗИН</button><button class="btn s" id="fsb">Полный экран</button>
-<p id="kh">ПК: W / стрелка вверх - газ, S - тормоз, A D - поворот, Q или пробел - сальто назад (на земле - вилли), E - сальто вперёд, J K L - трюки в воздухе, R - заново</p>
+<p id="kh">ПК: W / стрелка вверх - газ, S - тормоз, A D - поворот, Q или пробел - сальто назад (на земле - вилли), E - сальто вперёд, J - без рук (и на земле), K L - трюки в воздухе, R - заново</p>
 </div>
 <div id="hud" class="hide"><div id="sc"></div><div id="tr"><span id="sp"></span><br><button class="btn s" id="rb" style="pointer-events:auto">ЗАНОВО</button><button class="btn s" id="fs2" style="pointer-events:auto">Экран</button></div><div id="ob" class="hide"></div><div id="pop"></div><div id="air"></div></div>
 <div id="ctl" class="hide">
@@ -219,13 +219,13 @@ r.onclick=()=>setBike(i);r.appendChild(b);bx.appendChild(r)})}
 const keys={gas:0,brake:0,left:0,right:0,back:0,fwd:0,t0:0,t1:0,t2:0},wp=a=>{a%=6.28319;if(a>3.14159)a-=6.28319;if(a<-3.14159)a+=6.28319;return a};
 function setState(s){state=s;$('shop').classList.add('hide');$('det').classList.add('hide');$('onl').classList.add('hide');$('menu').classList.toggle('hide',s!=='menu');$('hud').classList.toggle('hide',s==='menu');$('ctl').classList.toggle('hide',!touch||s==='menu');if(s==='menu'||s==='play')$('over').classList.add('hide')}
 function pop(t){const e=$('pop');e.textContent=t;e.classList.remove('go');void e.offsetWidth;e.classList.add('go')}
-function showOver(t){overShown=true;$('ot').textContent=t;$('os').textContent='Очки: '+score+'   Монеты: +'+runCoins;$('over').classList.remove('hide')}
+function showOver(t){overShown=true;$('ot').textContent=t;$('os').textContent='Очки: '+Math.round(score)+'   Монеты: +'+runCoins;$('over').classList.remove('hide')}
 function crash(w){state='crashed';crashT=0;shake=1;PV=(Math.random()<.5?1:-1)*(w?4:7);if(w){V=4;VY=7}else{V*=.7;VY=5}emit(X,Y+.5,Z,40,6,5)}
 function step(dt){
  if(state==='menu')return;
  if(ON.cd>0){const n=Math.ceil(ON.cd-.2);if(n!==ON.n){ON.n=n;pop(n>0?String(n):'ПОЕХАЛИ!')}ON.cd-=dt;V=0;return}
  const play=state==='play',cr=state==='crashed',G=22,gas=play&&keys.gas,br=play&&keys.brake,l=play&&keys.left,r=play&&keys.right,bk=play&&keys.back,fw=play&&keys.fwd;
- for(let i=0;i<3;i++)tp[i]+=((air&&play&&keys['t'+i])?1-tp[i]:-tp[i])*(1-Math.exp(-dt*9));gH(X,Z);const sl=Math.atan(cl(K,-.8,.8)*Math.cos(YAW));
+ for(let i=0;i<3;i++)tp[i]+=(((play&&keys['t'+i]&&(air||i===0)))?1-tp[i]:-tp[i])*(1-Math.exp(-dt*9));gH(X,Z);const sl=Math.atan(cl(K,-.8,.8)*Math.cos(YAW));
  if(cr){V*=Math.exp(-dt*1.3);crashT+=dt;if(crashT>1.2&&!overShown)showOver('НЕУДАЧНОЕ ПРИЗЕМЛЕНИЕ')}
  else if(!air){if(gas){const b=BIKES[sel];V+=((42*b[4]-V)*.8*b[5]+4*b[5])*dt}if(br)V-=32*dt;if(!gas&&!br)V-=(1.5+V*.04)*dt;V-=Math.sin(sl)*G*.6*dt;if(V<0)V=0}
  else V-=.2*dt;
@@ -243,7 +243,7 @@ function step(dt){
     if(at>.5){const tn=['РУКИ ВВЕРХ','СУПЕРМЕН','ТЕЙБЛТОП'].filter((_,i)=>tt[i]>.4),pts=Math.round((at*60+n*1000+tt.reduce((a,b)=>a+(b>.4?b*300:0),0))*combo);score+=pts;{const c=Math.round(pts/12);coins+=c;runCoins+=c;save()}const t=[];if(fb)t.push(fb>1?fb+'x ЗАДНЕЕ САЛЬТО':'ЗАДНЕЕ САЛЬТО');if(ff)t.push(ff>1?ff+'x ПЕРЕДНЕЕ САЛЬТО':'ПЕРЕДНЕЕ САЛЬТО');pop((t.concat(tn).join(' + ')||'ПРЫЖОК')+'  +'+pts);if(n||at>1.2)combo=Math.min(5,combo+1)}
     shake=cl(.2+at*.3,0,1);emit(X,Y+.1,Z,22,5,3)}}
   if(state==='crashed'){Y=nh;if(Math.abs(VY)>4)VY=Math.abs(VY)*.3;else VY=0;PIT+=PV*dt;PV*=.97;if(V>2)emit(X,Y+.2,Z,1,2,1.5)}
-  else{Y=nh;VY=nk*Math.cos(YAW)*V;WL+=((bk&&V>2.5?.85:(fw&&V>5?-.3:0))-WL)*(1-Math.exp(-dt*(bk?2.2:4)));PIT+=(sl2+WL-PIT)*(1-Math.exp(-dt*14));PV=0;if(WL>.3&&V>8)score+=dt*40;if((gas&&V<14)||br)emit(X+Math.sin(YAW)*.9,Y+.1,Z+Math.cos(YAW)*.9,1,1.5,1.2)}
+  else{Y=nh;VY=nk*Math.cos(YAW)*V;WL+=((bk&&V>2.5?.85:(fw&&V>5?-.3:0))-WL)*(1-Math.exp(-dt*(bk?2.2:4)));PIT+=(sl2+WL-PIT)*(1-Math.exp(-dt*14));PV=0;if(WL>.3&&V>8)score+=dt*40;if(tp[0]>.5&&V>8)score+=dt*(WL>.3?90:45);if((gas&&V<14)||br)emit(X+Math.sin(YAW)*.9,Y+.1,Z+Math.cos(YAW)*.9,1,1.5,1.2)}
   air=false;
  }else{
   if(!air&&!cr){air=true;at=0;rot0=PIT;mx=mn=0;PV=0;tt=[0,0,0];WL=0;if(VY>3)emit(X,Y+.2,Z,12,3,2)}
@@ -252,7 +252,7 @@ function step(dt){
   else{const tg=(bk?1:0)-(fw?1:0);PV=cl(PV+tg*3.6*BIKES[sel][6]*dt,-6,6)*Math.exp(-dt*(tg?.3:1));PIT+=PV*dt;const ar=PIT-rot0;mx=Math.max(mx,ar);mn=Math.max(mn,-ar);at+=dt;for(let i=0;i<3;i++)if(tp[i]>.5)tt[i]+=dt}
  }
  if(play)for(const c of cps)if(-Z>c&&c>cpS){cpS=c;pop('ЧЕКПОИНТ')}
- if(play&&-Z>TR.s1-6){state='finished';cpS=TR.s0;coins+=TR.b;runCoins+=TR.b;if(ON.on)net({t:'fin',sc:score});save();showOver('ФИНИШ!')}
+ if(play&&-Z>TR.s1-6){state='finished';cpS=TR.s0;coins+=TR.b;runCoins+=TR.b;if(ON.on)net({t:'fin',sc:Math.round(score)});save();showOver('ФИНИШ!')}
 }
 function visuals(dt,t){
  if(state==='menu'){X=0;Z=-10;Y=0;YAW=0;PIT=0;ROL=0;V=0}
@@ -273,8 +273,8 @@ function visuals(dt,t){
  ground.position.x=Math.round(cam.position.x/8)*8;ground.position.z=Math.round(cam.position.z/8)*8;
  updP(dt);
  if(state!=='menu'){const n=Math.floor((mx+.9)/6.283)+Math.floor((mn+.9)/6.283);
-  $('sc').innerHTML='ОЧКИ '+score+'<small>КОМБО x'+combo+'  |  МОНЕТЫ '+coins+'</small>';$('sp').textContent=Math.round(V*3.6)+' км/ч  |  '+cl(Math.round((-Z-TR.s0)/(TR.s1-TR.s0)*100),0,100)+'%';
-  $('air').textContent=air&&state==='play'&&at>.3?'ВОЗДУХ '+at.toFixed(1)+'с'+(n?'   САЛЬТО x'+n:''):''}
+  $('sc').innerHTML='ОЧКИ '+Math.round(score)+'<small>КОМБО x'+combo+'  |  МОНЕТЫ '+coins+'</small>';$('sp').textContent=Math.round(V*3.6)+' км/ч  |  '+cl(Math.round((-Z-TR.s0)/(TR.s1-TR.s0)*100),0,100)+'%';
+  $('air').textContent=air&&state==='play'&&at>.3?'ВОЗДУХ '+at.toFixed(1)+'с'+(n?'   САЛЬТО x'+n:''):(!air&&state==='play'&&V>8&&(WL>.3||tp[0]>.5)?(WL>.3?'ВИЛЛИ ':'')+(tp[0]>.5?'БЕЗ РУК':''):'')}
 }
 /* input */
 const KM={KeyW:'gas',ArrowUp:'gas',KeyS:'brake',ArrowDown:'brake',KeyA:'left',ArrowLeft:'left',KeyD:'right',ArrowRight:'right',KeyQ:'back',Space:'back',KeyZ:'back',KeyE:'fwd',KeyX:'fwd',KeyJ:'t0',KeyK:'t1',KeyL:'t2'};
@@ -305,8 +305,8 @@ function remote(m){if(m.id===ON.id)return;let r=rem[m.id];if(!r){const p=ON.list
 function dropRemote(id){const r=rem[id];if(r){scene.remove(r.b.root,r.tag);delete rem[id]}}
 function leaveOn(){ON.on=0;ON.cd=0;try{ON.ws&&ON.ws.close()}catch(_){}ON.ws=null;Object.keys(rem).forEach(dropRemote);$('ob').classList.add('hide');$('again').classList.remove('hide')}
 function onTick(dt,t){for(const id in rem){const r=rem[id],m=r.m,c=r.c;if(!m)continue;const k=1-Math.exp(-dt*12);for(const q of['x','y','z','yaw','pit','rol'])c[q]+=(m[q]-c[q])*k;r.b.root.position.set(c.x,c.y+.6,c.z);r.b.root.rotation.set(c.pit,c.yaw,c.rol,'YXZ');r.b.rw.rotation.x=r.b.fw.rotation.x-=m.v*dt/.44;r.b.pose(m.tp||[0,0,0]);r.tag.position.set(c.x,c.y+2.6,c.z)}
-if(!ON.on)return;if(state!=='menu'&&t-ON.last>80){ON.last=t;net({t:'pos',x:+X.toFixed(2),y:+Y.toFixed(2),z:+Z.toFixed(2),yaw:+YAW.toFixed(3),pit:+PIT.toFixed(3),rol:+(ROL+tp[2]*1.3).toFixed(3),v:Math.round(V),sc:score,tp:tp.map(a=>+a.toFixed(2))})}
-if(t-ON.bt>250){ON.bt=t;const rows=ON.list.map(p=>{const me=p.id===ON.id,r=rem[p.id];return{n:p.name,sc:me?score:(p.pl?p.sc:(r&&r.m?r.m.sc:0)),pl:p.pl|0,me}}).sort((a,b)=>b.sc-a.sc);
+if(!ON.on)return;if(state!=='menu'&&t-ON.last>80){ON.last=t;net({t:'pos',x:+X.toFixed(2),y:+Y.toFixed(2),z:+Z.toFixed(2),yaw:+YAW.toFixed(3),pit:+PIT.toFixed(3),rol:+(ROL+tp[2]*1.3).toFixed(3),v:Math.round(V),sc:Math.round(score),tp:tp.map(a=>+a.toFixed(2))})}
+if(t-ON.bt>250){ON.bt=t;const rows=ON.list.map(p=>{const me=p.id===ON.id,r=rem[p.id];return{n:p.name,sc:Math.round(me?score:(p.pl?p.sc:(r&&r.m?r.m.sc:0))),pl:p.pl|0,me}}).sort((a,b)=>b.sc-a.sc);
 $('ob').innerHTML=rows.slice(0,5).map(r=>(r.me?'<b>':'')+esc(r.n)+' '+r.sc+(r.pl?' #'+r.pl:'')+(r.me?'</b>':'')).join('<br>');
 if(state==='finished'){$('again').classList.add('hide');$('os').innerHTML=rows.map(r=>({...r,tot:r.sc+(r.pl?BON[Math.min(r.pl-1,3)]:0)})).sort((a,b)=>b.tot-a.tot).map(r=>(r.me?'<b>':'')+esc(r.n)+': '+r.sc+(r.pl?' + '+BON[Math.min(r.pl-1,3)]+' (место '+r.pl+') = '+(r.sc+BON[Math.min(r.pl-1,3)]):' (едет)')+(r.me?'</b>':'')).join('<br>')}}}
 $('onb').onclick=showOnl;$('oback').onclick=()=>{leaveOn();$('onl').classList.add('hide');$('menu').classList.remove('hide');omsg('')};
@@ -332,7 +332,7 @@ $('det').addEventListener('pointerdown',e=>{if(e.target.closest('button'))return
 $('dback').onclick=()=>{$('det').classList.add('hide');$('shop').classList.remove('hide');setBike(sel)};
 $('shopb').onclick=()=>{$('menu').classList.add('hide');$('shop').classList.remove('hide');renderShop()};$('shopback').onclick=()=>{$('shop').classList.add('hide');$('menu').classList.remove('hide');setBike(sel)};
 $('play').onclick=start;$('fsb').onclick=$('fs2').onclick=$('fs3').onclick=fs;$('rb').onclick=$('again').onclick=restart;$('tomenu').onclick=()=>{leaveOn();cpS=TR.s0;reset();setState('menu')};
-if(touch)$('kh').textContent='Телефон: газ и тормоз справа, поворот и наклон (сальто) слева. Трюки (РУКИ, СУПЕРМЕН, ТЕЙБЛ) жми в воздухе, но отпусти до приземления. Можно жать несколько кнопок сразу. На земле кнопка НАЗАД поднимает переднее колесо (вилли), в воздухе крутит сальто. Лучше играть в горизонтальном режиме.';
+if(touch)$('kh').textContent='Телефон: газ и тормоз справа, поворот и наклон (сальто) слева. Кнопку РУКИ можно жать и на земле (без рук, даже на заднем колесе), СУПЕРМЕН и ТЕЙБЛ - в воздухе, но отпусти до приземления. Можно жать несколько кнопок сразу. На земле кнопка НАЗАД поднимает переднее колесо (вилли), в воздухе крутит сальто. Лучше играть в горизонтальном режиме.';
 function rs(){renderer.setSize(innerWidth,innerHeight,false);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();chk()}
 addEventListener('resize',rs);addEventListener('orientationchange',()=>setTimeout(rs,250));
 reset();setBike(sel);setState('menu');rs();
